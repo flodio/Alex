@@ -1,0 +1,9 @@
+telethon
+anthropic
+yfinance
+pandas
+numpy
+streamlit
+plotly
+python-dotenv
+ta
