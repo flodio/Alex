@@ -1,6 +1,7 @@
 telethon
 anthropic
 yfinance
+MetaTrader5  # Windows uniquement — requis pour les données OHLC XAUUSD spot
 pandas
 numpy
 streamlit

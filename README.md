@@ -6,7 +6,7 @@ Outil complet pour extraire, analyser et reverse-engineer les signaux de trading
 
 - **Extraction automatique** des signaux depuis un groupe Telegram privé (via compte personnel Telethon)
 - **Parsing intelligent** avec Claude API (Anthropic) — gère le texte libre, les emojis, le spam
-- **Données OHLC** XAUUSD récupérées via yfinance (Gold Futures `GC=F`)
+- **Données OHLC** XAUUSD récupérées via MetaTrader5 (fallback yfinance `GC=F`)
 - **Analyse SMC/ICT** complète : Order Blocks, FVG, CHOCH, BOS, liquidités, Fibonacci, premium/discount
 - **Reverse-engineering** des confirmations cachées par comparaison gagnants vs perdants
 - **Dashboard Streamlit** interactif avec visualisations Plotly
@@ -20,7 +20,7 @@ alex/
 ├── config.py                  # Clés API + configuration
 ├── telegram_extractor.py      # Extraction signaux via Telethon
 ├── signal_parser.py           # Parsing avec Claude API
-├── ohlc_fetcher.py            # Données XAUUSD via yfinance
+├── ohlc_fetcher.py            # Données XAUUSD via MetaTrader5 (fallback yfinance)
 ├── smc_analyzer.py            # Détection OB, FVG, CHOCH, BOS, liquidités
 ├── pattern_detector.py        # Reverse-engineering confirmations cachées
 ├── database.py                # SQLite — stockage trades + analyses
@@ -38,6 +38,7 @@ README.md
 
 - Python 3.10+ installé sur votre serveur Windows
 - Compte Telegram personnel (pas un bot)
+- MetaTrader5 installé et connecté à un broker (voir section **Configuration MT5** ci-dessous)
 
 ### 2. Cloner le projet et installer les dépendances
 
@@ -45,14 +46,24 @@ README.md
 pip install -r requirements.txt
 ```
 
-### 3. Obtenir les clés API Telegram
+> **Note :** Le package `MetaTrader5` est Windows uniquement. Sur d'autres systèmes,
+> les données OHLC seront récupérées automatiquement via yfinance (`GC=F`) en fallback.
+
+### 3. Configuration MT5
+
+1. Téléchargez et installez MetaTrader 5 depuis [metatrader5.com](https://www.metatrader5.com/fr/download)
+2. Ouvrez un compte démo gratuit chez un broker supportant XAUUSD spot (ex : ICMarkets, Pepperstone, XM)
+3. Dans MT5, vérifiez que le symbole `XAUUSD` est disponible dans l'onglet *Observation du marché*
+4. Laissez MT5 ouvert et connecté en arrière-plan pendant l'exécution du pipeline
+
+### 4. Obtenir les clés API Telegram
 
 1. Rendez-vous sur [https://my.telegram.org](https://my.telegram.org)
 2. Connectez-vous avec votre numéro de téléphone
 3. Cliquez sur **"API development tools"**
 4. Créez une application et notez `api_id` et `api_hash`
 
-### 4. Obtenir une clé API Claude (Anthropic)
+### 5. Obtenir une clé API Claude (Anthropic)
 
 1. Rendez-vous sur [https://console.anthropic.com](https://console.anthropic.com)
 2. Créez un compte et générez une clé API
@@ -75,25 +86,33 @@ ANTHROPIC_API_KEY = "sk-ant-..."    # Votre clé API Claude
 
 ## Utilisation
 
-### Lancer l'analyse complète
+### Étape 1 — Première connexion Telegram (une seule fois)
+
+Avant de lancer le pipeline, authentifiez votre compte Telegram de façon interactive :
 
 ```bash
-cd alex
-python main.py
+python alex/setup_telegram.py
 ```
 
-Lors de la première connexion, Telethon vous demandera votre code de vérification Telegram (envoyé par SMS ou dans l'app).
+Ce script vous demandera le code OTP reçu sur votre téléphone (et le mot de passe 2FA si activé).
+La session est sauvegardée dans `session_alex.session` — vous n'aurez plus à le relancer ensuite.
+
+### Étape 2 — Lancer l'analyse complète
+
+```bash
+python alex/main.py
+```
 
 Le pipeline exécute automatiquement :
 1. Extraction des messages Telegram (500 messages par défaut)
 2. Filtrage et parsing Claude → signaux structurés JSON
-3. Récupération OHLC via yfinance
+3. Récupération OHLC via MetaTrader5 (fallback yfinance si MT5 indisponible)
 4. Analyse SMC/ICT complète par trade
 5. Détection des patterns et confirmations cachées
 6. Sauvegarde dans `trades.db` (SQLite)
 7. Export `trades_export.csv` et `pattern_report.json`
 
-### Lancer le dashboard
+### Étape 3 — Lancer le dashboard
 
 ```bash
 streamlit run alex/dashboard.py

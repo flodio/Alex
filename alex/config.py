@@ -21,7 +21,7 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")  # Clé API Claude
 
 DB_PATH = os.getenv("DB_PATH", "trades.db")             # Chemin vers la base SQLite
 
-SYMBOL = os.getenv("SYMBOL", "GC=F")                    # XAUUSD sur yfinance (Gold Futures)
+SYMBOL = os.getenv("SYMBOL", "XAUUSD")                  # MT5 symbole spot Gold
 
 # Nombre de messages Telegram à récupérer par défaut
 TELEGRAM_MESSAGE_LIMIT = int(os.getenv("TELEGRAM_MESSAGE_LIMIT", "500"))
