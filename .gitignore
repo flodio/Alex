@@ -1,0 +1,26 @@
+# Fichier de configuration avec les secrets — NE PAS committer
+.env
+
+# Données OHLC mises en cache localement
+ohlc_cache/
+
+# Base SQLite
+*.db
+
+# Logs
+*.log
+
+# Rapports et exports générés
+pattern_report.json
+trades_export.csv
+
+# Session Telethon
+*.session
+*.session-journal
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
